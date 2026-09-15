@@ -152,7 +152,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 
 .chart-wrap{position:relative;height:280px;width:100%}
 
-/* ADD FORM with SCANNER */
 .add-form{display:grid;grid-template-columns:1fr 160px 200px auto;gap:12px}
 .field{position:relative}
 .field label{position:absolute;top:-8px;left:14px;background:var(--bg-secondary);padding:0 6px;font-size:.65rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;pointer-events:none;z-index:1}
@@ -165,7 +164,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .btn-secondary{padding:12px 20px;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-subtle);border-radius:var(--radius-md);font-weight:700;cursor:pointer;font-size:.85rem;transition:all .2s;display:inline-flex;align-items:center;gap:8px;font-family:inherit}
 .btn-secondary:hover{background:var(--bg-elevated);color:var(--accent-bright);border-color:var(--border-strong)}
 
-/* Scanner inline in add form */
 .add-form .barcode-row{grid-column:1/-1;display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:4px}
 .add-form .barcode-input-wrap{position:relative}
 .add-form .barcode-input-wrap input{padding-right:44px;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
@@ -173,7 +171,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .add-form .barcode-input-wrap .scan-inside-btn:active{transform:translateY(-50%) scale(.92)}
 .scan-hint{font-size:.68rem;color:var(--text-muted);font-weight:600;padding-top:6px;grid-column:1/-1}
 
-/* TABLE */
 .table-wrap{overflow-x:auto;margin:0 -22px;padding:0 22px}
 .inv-table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:750px}
 .inv-table th{text-align:left;padding:12px 14px;color:var(--text-muted);font-size:.68rem;text-transform:uppercase;letter-spacing:1.4px;font-weight:800;border-bottom:1px solid var(--border-subtle);white-space:nowrap}
@@ -195,7 +192,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 @keyframes highlightRow{0%{background:rgba(16,185,129,.4)}100%{background:transparent}}
 .row-highlight td{animation:highlightRow 2s ease-out}
 
-/* MODALS */
 .modal-overlay{position:fixed;inset:0;background:rgba(5,13,28,.88);backdrop-filter:blur(10px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
 .modal-overlay.open{opacity:1;pointer-events:auto}
 .modal{width:100%;max-width:560px;background:var(--bg-secondary);border:1px solid var(--border-strong);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg),0 0 60px var(--accent-glow);overflow:hidden;transform:scale(.95);transition:transform .25s;display:flex;flex-direction:column;max-height:90vh}
@@ -209,7 +205,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 .modal-body{padding:22px;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
 .modal-footer{padding:16px 22px;border-top:1px solid var(--border-subtle);display:flex;justify-content:flex-end;gap:10px;background:var(--bg-tertiary)}
 
-/* SCANNER MODAL */
 .scanner-viewport{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:var(--radius-lg);overflow:hidden;border:2px solid var(--accent);box-shadow:0 0 40px var(--accent-glow)}
 #scannerVideo{width:100%;height:100%;object-fit:cover}
 .scanner-overlay{position:absolute;inset:0;pointer-events:none}
@@ -339,7 +334,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 
 <script type="module">
 /* ============================================================
-   ElectroPOS · Admin Console — Google Sign-In + Barcode Scanner
+   ElectroPOS · Admin Console
+   KSh Currency · Mobile-Safe Google Sign-In
    ============================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
@@ -356,8 +352,7 @@ import {
 import { getDatabase, ref, push, set, onValue, update, remove, get, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* 🔥 REPLACE WITH YOUR REAL FIREBASE CONFIG */
-
+/* 🔥 YOUR FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyDh3pTqEkU_2G2MpQtDtvZQc1vXM6tvMFo",
   authDomain: "lemsaaccessories.firebaseapp.com",
@@ -365,59 +360,84 @@ const firebaseConfig = {
   projectId: "lemsaaccessories",
   storageBucket: "lemsaaccessories.firebasestorage.app",
   messagingSenderId: "179554538147",
-  appId: "1:179554538147:web:0ac2b90ed887e3704de516",
-  measurementId: "G-NSDC4N5KBF"
+  appId: "1:179554538147:web:0ac2b90ed887e3704de516"
 };
 
-
-/* 👇 Bootstrap admin emails — grants admin access even if DB role missing */
+/* 👇 Bootstrap admins (works even without a DB entry) */
 const BOOTSTRAP_ADMINS = [
   'kasaineisack@gmail.com'
-  // Add your Google email(s) here for first-time access
 ];
 
-/* =====================================================
+/* 💰 Currency */
+const CURRENCY = { symbol: 'KSh', code: 'KSh' };
+
+/* ============================================================
    CONFIG VALIDATION
-   ===================================================== */
+   ============================================================ */
 (function validateConfig() {
   const errors = [];
-  if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY_HERE' || !firebaseConfig.apiKey.startsWith('AIza')) {
-    errors.push('apiKey missing or placeholder');
-  }
-  if (!firebaseConfig.databaseURL || firebaseConfig.databaseURL.includes('YOUR-PROJECT')) {
-    errors.push('databaseURL missing or placeholder');
-  }
-  if (errors.length > 0) {
+  if (!firebaseConfig.apiKey || !firebaseConfig.apiKey.startsWith('AIza')) errors.push('apiKey missing');
+  if (!firebaseConfig.databaseURL) errors.push('databaseURL missing');
+  if (errors.length) {
     document.getElementById('app').innerHTML = `
-      <div class="fatal-screen">
-        <div class="fatal-card">
-          <div class="icon">⚠️</div>
-          <h2>Firebase Config Missing</h2>
-          <p>Paste your real Firebase config at the top of this file.</p>
-          <pre>${errors.map(e => '• ' + e).join('\n')}</pre>
-          <button onclick="location.reload()">Retry</button>
-        </div>
-      </div>`;
+      <div class="fatal-screen"><div class="fatal-card"><div class="icon">⚠️</div>
+      <h2>Firebase Config Missing</h2><pre>${errors.map(e=>'• '+e).join('\n')}</pre>
+      <button onclick="location.reload()">Retry</button></div></div>`;
     throw new Error('Config invalid');
   }
 })();
 
+/* ============================================================
+   FIREBASE BOOTSTRAP — IIFE ensures persistence is set BEFORE
+   any auth call, and resolves any pending redirect cleanly.
+   ============================================================ */
 let app, auth, db;
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getDatabase(app);
-  setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence:', e));
-  console.log('✅ [ElectroPOS Admin] Firebase initialized');
-} catch (e) {
-  document.getElementById('app').innerHTML = `
-    <div class="fatal-screen"><div class="fatal-card"><div class="icon">💥</div><h2>Init Failed</h2><pre>${e.message}</pre><button onclick="location.reload()">Retry</button></div></div>`;
-  throw e;
-}
+let firebaseReady = false;
+const firebaseReadyPromise = new Promise(resolve => {
+  window.__resolveFirebaseReady = resolve;
+});
 
-/* =====================================================
+(async () => {
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getDatabase(app);
+
+    // 🔒 Set persistence FIRST — this is critical for mobile redirect flows
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      console.log('✅ Auth persistence: LOCAL');
+    } catch (e) {
+      console.warn('setPersistence failed:', e);
+    }
+
+    // Resolve any pending redirect (mobile sign-in return)
+    try {
+      const result = await getRedirectResult(auth);
+      if (result && result.user) {
+        console.log('✅ Redirect resolved:', result.user.email);
+      } else {
+        console.log('ℹ️ No pending redirect');
+      }
+    } catch (e) {
+      console.error('getRedirectResult error:', e);
+    }
+
+    console.log('✅ [ElectroPOS Admin] Firebase initialized');
+    firebaseReady = true;
+    window.__resolveFirebaseReady();
+  } catch (e) {
+    console.error('Firebase init failed:', e);
+    document.getElementById('app').innerHTML = `
+      <div class="fatal-screen"><div class="fatal-card"><div class="icon">💥</div>
+      <h2>Init Failed</h2><pre>${e.message}</pre>
+      <button onclick="location.reload()">Retry</button></div></div>`;
+  }
+})();
+
+/* ============================================================
    STATE
-   ===================================================== */
+   ============================================================ */
 let currentUser = null;
 let products = [];
 let transactions = [];
@@ -425,24 +445,35 @@ let users = {};
 let txFilter = 'all';
 let userFilter = 'all';
 let salesChart = null;
-
-// Scanner
 let scanner = null;
 let scannerActive = false;
-let scannerTarget = null;   // 'add-product' | 'edit-product' | 'lookup'
+let scannerTarget = null;
 let lastScannedCode = null;
 let lastScannedAt = 0;
-
 let activeEditProductId = null;
 let activeStockProductId = null;
 let activeLabelProductId = null;
 let activeEditUserId = null;
-
 let shellRendered = false;
+let authHandlerRunning = false;
 
-/* =====================================================
-   TOAST + HELPERS
-   ===================================================== */
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function escapeHtml(str){return String(str==null?'':str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+function fmtMoney(n){
+  const num = Number(n) || 0;
+  const fixed = num.toFixed(2);
+  const parts = fixed.split('.');
+  return CURRENCY.symbol + ' ' + parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + parts[1];
+}
+
+function timeAgo(ts){const d=Date.now()-ts;if(d<60000)return'just now';if(d<3600000)return Math.floor(d/60000)+'m ago';if(d<86400000)return Math.floor(d/3600000)+'h ago';if(d<604800000)return Math.floor(d/86400000)+'d ago';return new Date(ts).toLocaleDateString();}
+function iconForCategory(cat){return {phones:'fa-mobile-alt',laptops:'fa-laptop',audio:'fa-headphones',accessories:'fa-plug'}[cat]||'fa-box';}
+function initials(name){return (name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+function isSelf(uid){return currentUser && currentUser.uid === uid;}
+
 function toast(msg, type = 'info', duration = 2800) {
   let c = document.querySelector('.toast-container');
   if (!c) { c = document.createElement('div'); c.className = 'toast-container'; document.body.appendChild(c); }
@@ -453,12 +484,6 @@ function toast(msg, type = 'info', duration = 2800) {
   c.appendChild(el);
   setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(30px)'; el.style.transition='.3s'; setTimeout(()=>el.remove(),300); }, duration);
 }
-function escapeHtml(str){return String(str==null?'':str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function fmtMoney(n){return '$'+(Number(n)||0).toFixed(2);}
-function timeAgo(ts){const d=Date.now()-ts;if(d<60000)return'just now';if(d<3600000)return Math.floor(d/60000)+'m ago';if(d<86400000)return Math.floor(d/3600000)+'h ago';if(d<604800000)return Math.floor(d/86400000)+'d ago';return new Date(ts).toLocaleDateString();}
-function iconForCategory(cat){return {phones:'fa-mobile-alt',laptops:'fa-laptop',audio:'fa-headphones',accessories:'fa-plug'}[cat]||'fa-box';}
-function initials(name){return (name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();}
-function isSelf(uid){return currentUser && currentUser.uid === uid;}
 
 let audioCtx = null;
 function beep(freq = 900, duration = 90) {
@@ -475,9 +500,9 @@ function beep(freq = 900, duration = 90) {
   } catch (e) {}
 }
 
-/* =====================================================
+/* ============================================================
    LOGIN
-   ===================================================== */
+   ============================================================ */
 function renderLogin(errorMsg = '') {
   document.getElementById('app').innerHTML = `
     <div class="login-screen">
@@ -504,7 +529,7 @@ function renderLogin(errorMsg = '') {
     try {
       await doGoogleSignIn();
     } catch (err) {
-      console.error('[ElectroPOS Admin] Google sign-in error:', err);
+      console.error('Google sign-in error:', err);
       const map = {
         'auth/popup-blocked':'Popup blocked. Allow popups and try again.',
         'auth/popup-closed-by-user':'Sign-in cancelled.',
@@ -522,14 +547,35 @@ function renderLogin(errorMsg = '') {
   };
 }
 
+/* 🔑 MOBILE-SAFE SIGN-IN
+   Detects mobile reliably, forces redirect on mobile,
+   tries popup + falls back to redirect on desktop. */
 async function doGoogleSignIn() {
+  if (!firebaseReady) {
+    await firebaseReadyPromise;
+  }
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth < 700;
+
+  const ua = navigator.userAgent || '';
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
+    || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+
   if (isMobile) {
+    console.log('📱 Mobile detected → using redirect');
     await signInWithRedirect(auth, provider);
   } else {
-    await signInWithPopup(auth, provider);
+    console.log('💻 Desktop detected → trying popup');
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (err) {
+      if (['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request'].includes(err.code)) {
+        console.log('Popup blocked → falling back to redirect');
+        await signInWithRedirect(auth, provider);
+      } else {
+        throw err;
+      }
+    }
   }
 }
 
@@ -546,14 +592,12 @@ function renderFatal(title, message, stack) {
     </div>`;
 }
 
-/* =====================================================
-   MAIN SHELL
-   ===================================================== */
+/* ============================================================
+   MAIN SHELL RENDER
+   ============================================================ */
 function renderShell() {
   const inits = initials(currentUser.name);
-  const avatarHtml = currentUser.photoURL
-    ? `<img src="${currentUser.photoURL}" alt="">`
-    : inits;
+  const avatarHtml = currentUser.photoURL ? `<img src="${currentUser.photoURL}" alt="">` : inits;
 
   document.getElementById('app').innerHTML = `
     <div class="app-shell">
@@ -605,13 +649,12 @@ function renderShell() {
         </header>
 
         <div class="content" id="content">
-          <!-- DASHBOARD -->
           <div class="view active" id="view-dashboard">
             <div class="stats-grid">
-              <div class="stat-card"><div class="stat-top"><div class="stat-icon blue"><i class="fas fa-dollar-sign"></i></div><span class="stat-trend up"><i class="fas fa-arrow-up"></i> Live</span></div><div class="stat-label">Total Revenue</div><div class="stat-value" id="statSales">$0.00</div><div class="stat-sub">All time</div></div>
+              <div class="stat-card"><div class="stat-top"><div class="stat-icon blue"><i class="fas fa-coins"></i></div><span class="stat-trend up"><i class="fas fa-arrow-up"></i> Live</span></div><div class="stat-label">Total Revenue</div><div class="stat-value" id="statSales">KSh 0.00</div><div class="stat-sub">All time</div></div>
               <div class="stat-card"><div class="stat-top"><div class="stat-icon cyan"><i class="fas fa-receipt"></i></div></div><div class="stat-label">Transactions</div><div class="stat-value" id="statTx">0</div><div class="stat-sub">All time</div></div>
               <div class="stat-card"><div class="stat-top"><div class="stat-icon purple"><i class="fas fa-boxes-stacked"></i></div></div><div class="stat-label">Products</div><div class="stat-value" id="statProducts">0</div><div class="stat-sub">In catalog</div></div>
-              <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-chart-line"></i></div></div><div class="stat-label">Avg. Order</div><div class="stat-value" id="statAvg">$0.00</div><div class="stat-sub">Per transaction</div></div>
+              <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-chart-line"></i></div></div><div class="stat-label">Avg. Order</div><div class="stat-value" id="statAvg">KSh 0.00</div><div class="stat-sub">Per transaction</div></div>
             </div>
             <div class="panel">
               <div class="panel-header"><div class="panel-title"><div class="panel-title-icon"><i class="fas fa-chart-area"></i></div><div><h3>Revenue Trend</h3><p>Last 7 days</p></div></div></div>
@@ -623,7 +666,6 @@ function renderShell() {
             </div>
           </div>
 
-          <!-- TRANSACTIONS -->
           <div class="view" id="view-transactions">
             <div class="panel">
               <div class="panel-header">
@@ -641,7 +683,6 @@ function renderShell() {
             </div>
           </div>
 
-          <!-- INVENTORY -->
           <div class="view" id="view-inventory">
             <div class="panel">
               <div class="panel-header">
@@ -652,7 +693,7 @@ function renderShell() {
               </div>
               <div class="add-form" id="addProductForm">
                 <div class="field"><label>Name</label><input id="newName" type="text" placeholder="Product name"></div>
-                <div class="field"><label>Price</label><input id="newPrice" type="number" placeholder="0.00" step="0.01" min="0"></div>
+                <div class="field"><label>Price (KSh)</label><input id="newPrice" type="number" placeholder="0.00" step="0.01" min="0"></div>
                 <div class="field"><label>Category</label>
                   <select id="newCat">
                     <option value="phones">Phones</option>
@@ -692,7 +733,6 @@ function renderShell() {
             </div>
           </div>
 
-          <!-- USERS -->
           <div class="view" id="view-users">
             <div class="panel">
               <div class="panel-header">
@@ -710,7 +750,6 @@ function renderShell() {
             </div>
           </div>
 
-          <!-- STAFF -->
           <div class="view" id="view-staff">
             <div class="panel">
               <div class="panel-header"><div class="panel-title"><div class="panel-title-icon"><i class="fas fa-user-tie"></i></div><div><h3>Staff Performance</h3><p>Sales by team member</p></div></div></div>
@@ -718,12 +757,11 @@ function renderShell() {
             </div>
           </div>
 
-          <!-- ANALYTICS -->
           <div class="view" id="view-analytics">
             <div class="stats-grid">
-              <div class="stat-card"><div class="stat-top"><div class="stat-icon blue"><i class="fas fa-calendar-day"></i></div></div><div class="stat-label">Today</div><div class="stat-value" id="anToday">$0.00</div><div class="stat-sub" id="anTodayCount">0 sales</div></div>
-              <div class="stat-card"><div class="stat-top"><div class="stat-icon cyan"><i class="fas fa-calendar-week"></i></div></div><div class="stat-label">This Week</div><div class="stat-value" id="anWeek">$0.00</div><div class="stat-sub" id="anWeekCount">0 sales</div></div>
-              <div class="stat-card"><div class="stat-top"><div class="stat-icon purple"><i class="fas fa-calendar"></i></div></div><div class="stat-label">This Month</div><div class="stat-value" id="anMonth">$0.00</div><div class="stat-sub" id="anMonthCount">0 sales</div></div>
+              <div class="stat-card"><div class="stat-top"><div class="stat-icon blue"><i class="fas fa-calendar-day"></i></div></div><div class="stat-label">Today</div><div class="stat-value" id="anToday">KSh 0.00</div><div class="stat-sub" id="anTodayCount">0 sales</div></div>
+              <div class="stat-card"><div class="stat-top"><div class="stat-icon cyan"><i class="fas fa-calendar-week"></i></div></div><div class="stat-label">This Week</div><div class="stat-value" id="anWeek">KSh 0.00</div><div class="stat-sub" id="anWeekCount">0 sales</div></div>
+              <div class="stat-card"><div class="stat-top"><div class="stat-icon purple"><i class="fas fa-calendar"></i></div></div><div class="stat-label">This Month</div><div class="stat-value" id="anMonth">KSh 0.00</div><div class="stat-sub" id="anMonthCount">0 sales</div></div>
               <div class="stat-card"><div class="stat-top"><div class="stat-icon green"><i class="fas fa-trophy"></i></div></div><div class="stat-label">Best Seller</div><div class="stat-value" id="anTopProduct" style="font-size:1.1rem">—</div><div class="stat-sub" id="anTopProductCount">No data</div></div>
             </div>
             <div class="panel">
@@ -765,7 +803,7 @@ function renderShell() {
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-field full"><label>Name</label><input id="editName" type="text"></div>
-            <div class="form-field"><label>Price</label><input id="editPrice" type="number" step="0.01" min="0"></div>
+            <div class="form-field"><label>Price (KSh)</label><input id="editPrice" type="number" step="0.01" min="0"></div>
             <div class="form-field"><label>Category</label>
               <select id="editCat"><option value="phones">Phones</option><option value="laptops">Laptops</option><option value="audio">Audio</option><option value="accessories">Accessories</option></select>
             </div>
@@ -873,9 +911,9 @@ function renderShell() {
   try { initChart(); } catch (e) { console.warn('Chart:', e); }
 }
 
-/* =====================================================
+/* ============================================================
    EVENT WIRING
-   ===================================================== */
+   ============================================================ */
 function wireShellEvents() {
   document.getElementById('logoutBtn').onclick = () => signOut(auth);
   document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
@@ -887,17 +925,14 @@ function wireShellEvents() {
   document.getElementById('menuToggle').onclick = () => { sidebar.classList.add('open'); backdrop.classList.add('open'); };
   backdrop.onclick = () => { sidebar.classList.remove('open'); backdrop.classList.remove('open'); };
 
-  // Add product
   document.getElementById('addBtn').onclick = addProduct;
   document.getElementById('newPrice').onkeypress = e => { if (e.key === 'Enter') addProduct(); };
   document.getElementById('newBarcode').onkeypress = e => { if (e.key === 'Enter') document.getElementById('newName').focus(); };
   document.getElementById('scanForAdd').onclick = () => openScanner('add-product');
   document.getElementById('startBulkScan').onclick = () => openScanner('bulk-add');
 
-  // Inventory search
   document.getElementById('invSearch').oninput = renderProducts;
 
-  // Transactions filter
   document.getElementById('filterTabs').onclick = e => {
     const tab = e.target.closest('.filter-tab');
     if (!tab) return;
@@ -907,7 +942,6 @@ function wireShellEvents() {
     renderTransactions();
   };
 
-  // Users filter
   document.getElementById('userFilterTabs').onclick = e => {
     const tab = e.target.closest('.filter-tab');
     if (!tab) return;
@@ -917,35 +951,29 @@ function wireShellEvents() {
     renderUsers();
   };
 
-  // Scanner modal
   document.getElementById('closeScanner').onclick = closeScanner;
   document.getElementById('manualUse').onclick = () => { const v = document.getElementById('manualBarcode').value.trim(); if (v) handleScannedCode(v); };
   document.getElementById('manualBarcode').onkeypress = e => { if (e.key === 'Enter') { const v = e.target.value.trim(); if (v) handleScannedCode(v); } };
 
-  // Edit product
   document.getElementById('closeEdit').onclick = () => document.getElementById('editModal').classList.remove('open');
   document.getElementById('cancelEdit').onclick = () => document.getElementById('editModal').classList.remove('open');
   document.getElementById('saveEdit').onclick = saveEditProduct;
   document.getElementById('scanForEditBtn').onclick = () => openScanner('edit-product');
 
-  // Stock
   document.getElementById('closeStock').onclick = () => document.getElementById('stockModal').classList.remove('open');
   document.getElementById('stockAmount').oninput = updateStockPreview;
   document.getElementById('stockAddBtn').onclick = () => changeStock(1);
   document.getElementById('stockRemoveBtn').onclick = () => changeStock(-1);
 
-  // Label
   document.getElementById('closeLabel').onclick = () => document.getElementById('labelModal').classList.remove('open');
   document.getElementById('cancelLabel').onclick = () => document.getElementById('labelModal').classList.remove('open');
   document.getElementById('printLabel').onclick = () => window.print();
   document.getElementById('labelCopies').oninput = renderLabelPreview;
 
-  // Receipt
   document.getElementById('closeReceipt').onclick = () => document.getElementById('receiptModal').classList.remove('open');
   document.getElementById('cancelReceipt').onclick = () => document.getElementById('receiptModal').classList.remove('open');
   document.getElementById('printReceipt').onclick = () => window.print();
 
-  // Users
   document.getElementById('addUserBtn').onclick = () => document.getElementById('addUserModal').classList.add('open');
   document.getElementById('closeAddUser').onclick = () => document.getElementById('addUserModal').classList.remove('open');
   document.getElementById('cancelAddUser').onclick = () => document.getElementById('addUserModal').classList.remove('open');
@@ -976,9 +1004,9 @@ function switchView(view) {
   if (view === 'dashboard') setTimeout(initChart, 100);
 }
 
-/* =====================================================
-   BARCODE SCANNER
-   ===================================================== */
+/* ============================================================
+   SCANNER
+   ============================================================ */
 function openScanner(target) {
   scannerTarget = target || 'lookup';
   document.getElementById('scannerModal').classList.add('open');
@@ -990,27 +1018,12 @@ function openScanner(target) {
   const titleEl = document.getElementById('scannerTitle');
   const bulkInfo = document.getElementById('bulkScanInfo');
 
-  // Configure mode-specific UI
-  if (scannerTarget === 'add-product') {
-    titleEl.textContent = 'Scan Barcode for New Product';
-    bulkInfo.style.display = 'none';
-  } else if (scannerTarget === 'edit-product') {
-    titleEl.textContent = 'Scan Barcode for Edit';
-    bulkInfo.style.display = 'none';
-  } else if (scannerTarget === 'bulk-add') {
-    titleEl.textContent = 'Bulk Add Products';
-    bulkInfo.style.display = 'block';
-    window.__bulkCount = 0;
-    document.getElementById('bulkCount').textContent = '0';
-  } else {
-    titleEl.textContent = 'Scan Barcode';
-    bulkInfo.style.display = 'none';
-  }
+  if (scannerTarget === 'add-product') { titleEl.textContent = 'Scan Barcode for New Product'; bulkInfo.style.display = 'none'; }
+  else if (scannerTarget === 'edit-product') { titleEl.textContent = 'Scan Barcode for Edit'; bulkInfo.style.display = 'none'; }
+  else if (scannerTarget === 'bulk-add') { titleEl.textContent = 'Bulk Add Products'; bulkInfo.style.display = 'block'; window.__bulkCount = 0; document.getElementById('bulkCount').textContent = '0'; }
+  else { titleEl.textContent = 'Scan Barcode'; bulkInfo.style.display = 'none'; }
 
-  if (!window.ZXing) {
-    status.textContent = '⚠️ Scanner library missing. Use manual entry.';
-    return;
-  }
+  if (!window.ZXing) { status.textContent = '⚠️ Scanner library missing. Use manual entry.'; return; }
 
   scanner = new ZXing.BrowserMultiFormatReader();
   scannerActive = true;
@@ -1023,9 +1036,7 @@ function openScanner(target) {
       const code = result.getText();
       const now = Date.now();
       if (code === lastScannedCode && (now - lastScannedAt) < 2000) return;
-      lastScannedCode = code;
-      lastScannedAt = now;
-
+      lastScannedCode = code; lastScannedAt = now;
       status.textContent = `✅ ${code}`;
       status.classList.add('active');
       beep(1200, 80);
@@ -1042,10 +1053,7 @@ function closeScanner() {
   scannerActive = false;
   if (scanner) { try { scanner.reset(); } catch (e) {} scanner = null; }
   const video = document.getElementById('scannerVideo');
-  if (video && video.srcObject) {
-    video.srcObject.getTracks().forEach(t => t.stop());
-    video.srcObject = null;
-  }
+  if (video && video.srcObject) { video.srcObject.getTracks().forEach(t => t.stop()); video.srcObject = null; }
   document.getElementById('manualBarcode').value = '';
   document.getElementById('scannerStatus').classList.remove('active');
 }
@@ -1058,22 +1066,15 @@ function handleScannedCode(code) {
     setTimeout(() => document.getElementById('newName').focus(), 300);
     return;
   }
-
   if (scannerTarget === 'edit-product') {
     document.getElementById('editBarcode').value = code;
     toast('Barcode set: ' + code, 'success');
     closeScanner();
     return;
   }
-
   if (scannerTarget === 'bulk-add') {
-    // Check if barcode exists already
     const existing = products.find(p => p.barcode === code || p.id === code);
-    if (existing) {
-      toast(`Already exists: ${existing.name}`, 'warning');
-      return;
-    }
-    // Pre-fill add form with the scanned barcode
+    if (existing) { toast(`Already exists: ${existing.name}`, 'warning'); return; }
     document.getElementById('newBarcode').value = code;
     document.getElementById('newName').value = '';
     document.getElementById('newPrice').value = '';
@@ -1083,14 +1084,9 @@ function handleScannedCode(code) {
     toast('Barcode captured: ' + code, 'success');
     closeScanner();
     switchView('inventory');
-    setTimeout(() => {
-      document.getElementById('newName').focus();
-      document.getElementById('addProductForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 200);
+    setTimeout(() => { document.getElementById('newName').focus(); document.getElementById('addProductForm').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
     return;
   }
-
-  // Default: lookup mode
   const product = products.find(p => p.barcode === code || p.id === code);
   if (product) {
     toast(`Found: ${product.name}`, 'success');
@@ -1111,9 +1107,9 @@ function highlightProductRow(productId) {
   setTimeout(() => row.classList.remove('row-highlight'), 2200);
 }
 
-/* =====================================================
+/* ============================================================
    PRODUCTS
-   ===================================================== */
+   ============================================================ */
 function renderProducts() {
   const tbody = document.getElementById('invBody');
   const countEl = document.getElementById('invCount');
@@ -1171,14 +1167,9 @@ async function addProduct() {
   const stock = parseInt(document.getElementById('newStock').value) || 0;
 
   if (!name || isNaN(price) || price <= 0) { toast('Enter valid name and price', 'warning'); return; }
-
-  // Check for duplicate barcode
   if (barcode) {
     const dup = products.find(p => p.barcode === barcode);
-    if (dup) {
-      toast(`Barcode already used by "${dup.name}"`, 'error');
-      return;
-    }
+    if (dup) { toast(`Barcode already used by "${dup.name}"`, 'error'); return; }
   }
 
   const btn = document.getElementById('addBtn');
@@ -1193,7 +1184,6 @@ async function addProduct() {
       stock,
       createdAt: serverTimestamp()
     });
-    // Clear form
     document.getElementById('newName').value = '';
     document.getElementById('newPrice').value = '';
     document.getElementById('newBarcode').value = '';
@@ -1201,12 +1191,8 @@ async function addProduct() {
     document.getElementById('newName').focus();
     toast(`"${name}" added`, 'success');
     beep(1200, 100);
-  } catch (e) {
-    toast('Failed: ' + e.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-plus"></i> Add';
-  }
+  } catch (e) { toast('Failed: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Add'; }
 }
 
 function openEditModal(id) {
@@ -1330,9 +1316,8 @@ function openReceipt(tx) {
   const items = tx.items || [];
   document.getElementById('receiptPrintArea').innerHTML = `
     <div class="receipt-paper">
-      <h2>⚡ ELECTROPOS</h2>
+      <h2>ELECTROPOS</h2>
       <div class="center">Electronics Shop</div>
-      <div class="center">Tel: (555) 123-4567</div>
       <div class="divider"></div>
       <div class="row"><span>Date:</span><span>${date}</span></div>
       <div class="row"><span>Staff:</span><span>${escapeHtml(tx.staff||'—')}</span></div>
@@ -1352,9 +1337,9 @@ function openReceipt(tx) {
   document.getElementById('receiptModal').classList.add('open');
 }
 
-/* =====================================================
+/* ============================================================
    TRANSACTIONS
-   ===================================================== */
+   ============================================================ */
 function renderTransactions() {
   const now = Date.now(); const dayMs = 86400000;
   let filtered = transactions;
@@ -1403,9 +1388,9 @@ function renderTransactions() {
   });
 }
 
-/* =====================================================
+/* ============================================================
    STATS / ANALYTICS / STAFF
-   ===================================================== */
+   ============================================================ */
 function renderStats() {
   const totalSales = transactions.reduce((s,t) => s + (t.total||0), 0);
   const count = transactions.length;
@@ -1462,9 +1447,9 @@ function renderStaff() {
     </div>`).join('');
 }
 
-/* =====================================================
-   USERS MANAGEMENT
-   ===================================================== */
+/* ============================================================
+   USERS
+   ============================================================ */
 function renderUsers() {
   const grid = document.getElementById('userGrid');
   if (!grid) return;
@@ -1532,7 +1517,6 @@ async function createNewUser() {
   if (!name || !email) { toast('Fill all fields', 'warning'); return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Invalid email format', 'warning'); return; }
 
-  // Check for duplicate email
   const dup = Object.values(users).find(u => (u.email || '').toLowerCase() === email.toLowerCase());
   if (dup) { toast(`Email already registered`, 'error'); return; }
 
@@ -1541,7 +1525,6 @@ async function createNewUser() {
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating…';
 
   try {
-    // Use email as the key (sanitized) — no Firebase Auth needed since Google handles it
     const uid = email.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now().toString(36);
     await set(ref(db, `users/${uid}`), {
       name, email: email.toLowerCase().trim(),
@@ -1598,9 +1581,9 @@ async function deleteUser(uid) {
   } catch (e) { toast('Failed: ' + e.message, 'error'); }
 }
 
-/* =====================================================
-   CHARTS
-   ===================================================== */
+/* ============================================================
+   CHARTS (KSh)
+   ============================================================ */
 function initChart() {
   const canvas = document.getElementById('salesChartCanvas');
   if (!canvas || typeof Chart === 'undefined') return;
@@ -1618,7 +1601,7 @@ function initChart() {
   salesChart = new Chart(ctx, {
     type:'line',
     data:{labels,datasets:[{label:'Revenue',data:values,borderColor:'#3b82f6',backgroundColor:grad,borderWidth:3,fill:true,tension:.4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0c1a33',pointBorderWidth:3,pointRadius:5,pointHoverRadius:7}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0c1a33',borderColor:'#3b82f6',borderWidth:1,padding:12,callbacks:{label:c=>'  $'+c.parsed.y.toFixed(2)}}},scales:{x:{grid:{display:false},ticks:{color:'#64748b',font:{size:11,weight:'600'}}},y:{grid:{color:'rgba(59,130,246,.08)'},ticks:{color:'#64748b',font:{size:11,weight:'600'},callback:v=>'$'+v}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0c1a33',borderColor:'#3b82f6',borderWidth:1,padding:12,callbacks:{label:c=>'  '+fmtMoney(c.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{color:'#64748b',font:{size:11,weight:'600'}}},y:{grid:{color:'rgba(59,130,246,.08)'},ticks:{color:'#64748b',font:{size:11,weight:'600'},callback:v=>'KSh '+v}}}}
   });
 }
 
@@ -1637,22 +1620,23 @@ function initCategoryChart() {
   window.__catChart = new Chart(canvas.getContext('2d'), {
     type:'doughnut',
     data:{labels:labels.length?labels:['No data'],datasets:[{data:data.length?data:[1],backgroundColor:labels.length?colors.slice(0,labels.length):['#1e3a5f'],borderColor:'#0c1a33',borderWidth:4,hoverOffset:8}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',padding:16,font:{size:12,weight:'600'},usePointStyle:true,pointStyle:'circle'}},tooltip:{backgroundColor:'#0c1a33',borderColor:'#3b82f6',borderWidth:1,padding:12,callbacks:{label:c=>'  '+c.label+': $'+c.parsed.toFixed(2)}}}}
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',padding:16,font:{size:12,weight:'600'},usePointStyle:true,pointStyle:'circle'}},tooltip:{backgroundColor:'#0c1a33',borderColor:'#3b82f6',borderWidth:1,padding:12,callbacks:{label:c=>'  '+c.label+': '+fmtMoney(c.parsed)}}}}
   });
 }
 
-/* =====================================================
-   EXPORT CSV
-   ===================================================== */
+/* ============================================================
+   CSV EXPORT (KSh)
+   ============================================================ */
 function exportCSV() {
   if (transactions.length === 0) { toast('No transactions', 'warning'); return; }
-  const rows = [['Date','Staff','Items','Total','Status']];
+  const rows = [['Date','Staff','Items','Total (KSh)','Currency','Status']];
   transactions.forEach(t => {
     rows.push([
       t.timestamp ? new Date(t.timestamp).toISOString() : '',
       t.staff || '',
       (t.items||[]).map(i => `${i.name} x${i.qty}`).join(' | '),
       (t.total||0).toFixed(2),
+      'KSh',
       t.status || 'completed'
     ]);
   });
@@ -1667,46 +1651,63 @@ function exportCSV() {
   toast('CSV exported', 'success');
 }
 
-/* =====================================================
-   AUTH + BOOT
-   ===================================================== */
-(async () => {
-  try {
-    const result = await getRedirectResult(auth);
-    if (result && result.user) console.log('[ElectroPOS Admin] Redirect resolved:', result.user.email);
-  } catch (err) {
-    console.error('[ElectroPOS Admin] Redirect error:', err);
-  }
-})();
-
+/* ============================================================
+   AUTH STATE — GUARDED against race conditions
+   ============================================================ */
 onAuthStateChanged(auth, async (user) => {
-  console.log('[ElectroPOS Admin] Auth state:', user ? user.email : 'signed out');
+  console.log('[Auth] state:', user ? user.email : 'signed out');
 
-  if (!user) {
-    shellRendered = false;
-    currentUser = null;
-    products = []; transactions = []; users = {};
-    renderLogin('');
+  // 🛡️ Prevent double-execution during mobile redirect resolution
+  if (authHandlerRunning) {
+    console.log('[Auth] handler already running — skipping');
     return;
   }
+  authHandlerRunning = true;
 
-  // Check admin role
   try {
-    const snap = await get(ref(db, 'users'));
-    const allUsers = snap.val() || {};
-    users = allUsers;
+    // ---- SIGNED OUT ----
+    if (!user) {
+      shellRendered = false;
+      currentUser = null;
+      products = []; transactions = []; users = {};
+      renderLogin('');
+      return;
+    }
 
-    const myEntry = Object.entries(allUsers).find(([uid, u]) =>
-      u && u.email && u.email.toLowerCase().trim() === (user.email || '').toLowerCase().trim()
-    );
+    // ---- VERIFY ADMIN ROLE ----
+    let isAdmin = false;
+    let userName = user.displayName || user.email.split('@')[0];
 
-    const emailIsBootstrapAdmin = BOOTSTRAP_ADMINS
-      .map(e => e.toLowerCase().trim())
-      .includes((user.email || '').toLowerCase().trim());
+    try {
+      const snap = await get(ref(db, 'users'));
+      const allUsers = snap.val() || {};
+      users = allUsers;
 
-    const dbRole = myEntry ? myEntry[1].role : null;
+      const myEntry = Object.entries(allUsers).find(([uid, u]) =>
+        u && u.email && u.email.toLowerCase().trim() === (user.email || '').toLowerCase().trim()
+      );
 
-    if (dbRole !== 'admin' && !emailIsBootstrapAdmin) {
+      const emailIsBootstrapAdmin = BOOTSTRAP_ADMINS
+        .map(e => e.toLowerCase().trim())
+        .includes((user.email || '').toLowerCase().trim());
+
+      const dbRole = myEntry ? myEntry[1].role : null;
+
+      if (dbRole === 'admin' || emailIsBootstrapAdmin) {
+        isAdmin = true;
+        if (myEntry && myEntry[1].name) userName = myEntry[1].name;
+      }
+    } catch (e) {
+      console.error('[Auth] Role check failed:', e);
+      // Fall back to bootstrap admin check
+      const emailIsBootstrapAdmin = BOOTSTRAP_ADMINS
+        .map(e => e.toLowerCase().trim())
+        .includes((user.email || '').toLowerCase().trim());
+      if (emailIsBootstrapAdmin) isAdmin = true;
+    }
+
+    if (!isAdmin) {
+      console.warn('[Auth] Not an admin — signing out');
       await signOut(auth);
       renderLogin(`"${user.email}" is not an admin account.`);
       return;
@@ -1715,51 +1716,52 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = {
       uid: user.uid,
       email: user.email,
-      name: (myEntry && myEntry[1].name) || user.displayName || user.email.split('@')[0],
+      name: userName,
       role: 'admin',
       photoURL: user.photoURL || null
     };
+
+    // ---- RENDER SHELL ONLY ONCE ----
+    if (!shellRendered) {
+      shellRendered = true;
+      try {
+        renderShell();
+        console.log('✅ Shell rendered for', currentUser.email);
+      } catch (e) {
+        console.error('Shell crash:', e);
+        renderFatal('Admin Console Crashed', 'Refresh to retry.', e.message);
+        return;
+      }
+
+      // ---- ATTACH LISTENERS AFTER SHELL RENDERS ----
+      onValue(ref(db, 'products'), (s) => {
+        const data = s.val() || {};
+        products = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+        if (shellRendered) { renderProducts(); renderStats(); }
+      });
+
+      onValue(ref(db, 'transactions'), (s) => {
+        const data = s.val() || {};
+        transactions = Object.entries(data).map(([id, val]) => {
+          let ts = val.timestamp;
+          if (ts && typeof ts === 'object' && ts['.sv'] === 'timestamp') ts = Date.now();
+          return { id, ...val, timestamp: ts || Date.now() };
+        }).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+        if (shellRendered) {
+          renderTransactions(); renderStats(); renderAnalytics(); renderStaff();
+          if (document.querySelector('#view-users.active')) renderUsers();
+        }
+      });
+
+      onValue(ref(db, 'users'), (s) => {
+        users = s.val() || {};
+        if (shellRendered && document.querySelector('#view-users')) renderUsers();
+      });
+    }
   } catch (e) {
-    console.error('[ElectroPOS Admin] Role check failed:', e);
-    renderLogin('Could not verify admin access. Try again.');
-    return;
-  }
-
-  // Listeners
-  onValue(ref(db, 'products'), (s) => {
-    const data = s.val() || {};
-    products = Object.entries(data).map(([id, val]) => ({ id, ...val }));
-    if (shellRendered) { renderProducts(); renderStats(); }
-  });
-
-  onValue(ref(db, 'transactions'), (s) => {
-    const data = s.val() || {};
-    transactions = Object.entries(data).map(([id, val]) => {
-      let ts = val.timestamp;
-      if (ts && typeof ts === 'object' && ts['.sv'] === 'timestamp') ts = Date.now();
-      return { id, ...val, timestamp: ts || Date.now() };
-    }).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
-    if (shellRendered) {
-      renderTransactions(); renderStats(); renderAnalytics(); renderStaff();
-      if (document.querySelector('#view-users.active')) renderUsers();
-    }
-  });
-
-  onValue(ref(db, 'users'), (s) => {
-    users = s.val() || {};
-    if (shellRendered && document.querySelector('#view-users')) renderUsers();
-  });
-
-  // Render shell
-  if (!shellRendered) {
-    shellRendered = true;
-    try {
-      renderShell();
-      console.log('[ElectroPOS Admin] ✅ Shell rendered for', currentUser.email);
-    } catch (e) {
-      console.error('[ElectroPOS Admin] Shell crash:', e);
-      renderFatal('Admin Console Crashed', 'Refresh to retry.', e.message);
-    }
+    console.error('[Auth] handler crashed:', e);
+  } finally {
+    setTimeout(() => { authHandlerRunning = false; }, 500);
   }
 });
 </script>
