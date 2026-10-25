@@ -6,43 +6,53 @@
 <meta name="theme-color" content="#081226">
 <meta name="apple-mobile-web-app-capable" content="yes">
 
+ <!-- PWA Structural Bindings via safe relative pathways definitions -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#007bff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="logo.png">
 
-  <!-- PWA Metadata Links -->
-<!-- Link the manifest using a relative path -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#111111">
-<link rel="apple-touch-icon" href="logo.png">
   <style>
-    /* Quick styling for the custom app download banner */
-    #pwa-install-banner {
+    /* Branded Dashboard Admin Application Installation Alert Prompt Display */
+    #admin-pwa-banner {
       display: none;
       position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #222;
-      color: #fff;
-      padding: 15px 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      z-index: 9999;
-      font-family: sans-serif;
+      top: 20px;
+      right: 20px;
+      background: #0d0d0d;
+      color: #ffffff;
+      padding: 16px 22px;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 10500;
+      font-family: system-ui, -apple-system, sans-serif;
       align-items: center;
-      gap: 15px;
-      width: 90%;
-      max-width: 400px;
+      gap: 18px;
+      border: 1px solid #007bff;
     }
-    #pwa-install-banner button {
+    #admin-pwa-banner span {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    #admin-pwa-install-btn {
       background: #007bff;
-      color: white;
+      color: #ffffff;
       border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 6px 14px;
+      border-radius: 4px;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 12px;
+      transition: background 0.15s ease-in-out;
+    }
+    #admin-pwa-install-btn:hover {
+      background: #0056b3;
     }
   </style>
-  
+
+ 
 <meta name="mobile-web-app-capable" content="yes">
 <title>ElectroPOS · Admin Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -683,11 +693,12 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
 </style>
 </head>
 <body>
-  <!-- Hidden Installation Promotion UI Element -->
-  <div id="pwa-install-banner">
-    <span>Download Lemsa App?</span>
-    <button id="pwa-install-btn">Install</button>
+   <!-- Hidden Installation Promotion Interface Container block unit -->
+  <div id="admin-pwa-banner">
+    <span>Install Admin App Workspace?</span>
+    <button id="admin-pwa-install-btn">Install</button>
   </div>
+
 
 
 <div id="app">
@@ -709,14 +720,47 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans
    Cash sales NEVER touch cash float; cash float never touched by sales.
    ============================================================ */
 
-  // Secure Service Worker registration for GitHub Pages subfolder
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('Service Worker Registered Successfully! Scope:', reg.scope))
-        .catch(err => console.error('Service Worker registration failed:', err));
+ 
+    // 1. Register Admin Service Layer Worker Thread securely 
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Admin Workspace Service Layer Active! scope:', reg.scope))
+          .catch(err => console.error('Admin System service worker fault event flag:', err));
+      });
+    }
+
+    // 2. Control Intercept Prompts logic blocks sequences execution configurations
+    let nativeAdminPrompt;
+    const adminUIPromptElement = document.getElementById('admin-pwa-banner');
+    const adminActionTrigger = document.getElementById('admin-pwa-install-btn');
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+      // Prevent browser default installation banner configurations framework flashing
+      event.preventDefault();
+      // Map instance attributes properties metrics reference controls parameters maps
+      nativeAdminPrompt = event;
+      // Show admin custom floating dashboard modal banner context wrapper
+      adminUIPromptElement.style.display = 'flex';
     });
-  }
+
+    adminActionTrigger.addEventListener('click', async () => {
+      if (!nativeAdminPrompt) return;
+      // Execute local systems execution native app store download layers triggers interfaces setup
+      nativeAdminPrompt.prompt();
+      
+      const { outcome } = await nativeAdminPrompt.userChoice;
+      console.log(`Admin user action choice outcome metric verification: ${outcome}`);
+      
+      nativeAdminPrompt = null;
+      adminUIPromptElement.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('Success! Lemsa Admin Workspace successfully installed onto terminal workstation.');
+      adminUIPromptElement.style.display = 'none';
+    });
+
 
   
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
