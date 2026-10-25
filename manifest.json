@@ -1,1 +1,23 @@
-
+{
+  "id": "index.html?utm_source=pwa",
+  "name": "Lemsa Accessories",
+  "short_name": "Lemsa",
+  "description": "Premium electronics and smartphone accessories shop.",
+  "start_url": "index.html?utm_source=pwa",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
