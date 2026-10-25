@@ -5,6 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#081226">
 <meta name="apple-mobile-web-app-capable" content="yes">
+
+
+  <!-- PWA Metadata Links -->
+<!-- Link the manifest using a relative path -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="logo.png">
+  <style>
+    /* Quick styling for the custom app download banner */
+    #pwa-install-banner {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      z-index: 9999;
+      font-family: sans-serif;
+      align-items: center;
+      gap: 15px;
+      width: 90%;
+      max-width: 400px;
+    }
+    #pwa-install-banner button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+  
 <meta name="mobile-web-app-capable" content="yes">
 <title>ElectroPOS · Admin Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
