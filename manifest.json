@@ -1,23 +1,34 @@
 {
-  "id": "index.html?utm_source=pwa",
-  "name": "Lemsa_Accessories_Admin",
-  "short_name": "Lemsa",
-  "description": "Premium electronics and smartphone accessories shop.",
-  "start_url": "index.html?utm_source=pwa",
+  "$schema": "https://schemastore.org",
+  "id": "index.html?utm_source=pwa_admin",
+  "name": "Lemsa Accessories Admin Portal",
+  "short_name": "Lemsa Admin",
+  "description": "Secure management and operations administration panel for Lemsa Accessories.",
+  "start_url": "index.html?utm_source=pwa_admin",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111",
-  "orientation": "portrait-primary",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0d0d0d",
+  "theme_color": "#007bff",
+  "orientation": "any",
+  "categories": ["productivity", "business"],
   "icons": [
     {
       "src": "logo.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
       "src": "logo.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ]
 }
